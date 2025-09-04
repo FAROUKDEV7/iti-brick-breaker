@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brick Breaker Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 800px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-box {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .game-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            background-color: #2c3e50;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 0 10px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-over, .game-win {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .game-over h2, .game-win h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #fdbb2d;
+        }
+
+        .game-over p, .game-win p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .instructions {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .info-value {
+                font-size: 1.2rem;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .info-box {
+                padding: 8px 15px;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Brick Breaker Game</h1>
+        
+        <div class="game-info">
+            <div class="info-box">
+                <div class="info-label">SCORE</div>
+                <div class="info-value" id="score">0</div>
+            </div>
+            
+            <div class="info-box">
+                <div class="info-label">LIVES</div>
+                <div class="info-value" id="lives">3</div>
+            </div>
+            
+            <div class="info-box">
+                <div class="info-label">LEVEL</div>
+                <div class="info-value" id="level">1</div>
+            </div>
+        </div>
+        
+        <div class="game-container">
+            <canvas id="game-canvas" width="800" height="500"></canvas>
+            
+            <div class="game-over" id="game-over">
+                <h2>Game Over!</h2>
+                <p>Final Score: <span id="final-score">0</span></p>
+                <button id="restart-btn">Play Again</button>
+            </div>
+            
+            <div class="game-win" id="game-win">
+                <h2>You Win!</h2>
+                <p>Congratulations! Score: <span id="win-score">0</span></p>
+                <button id="play-again-btn">Play Again</button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="start-btn">Start Game</button>
+            <button id="pause-btn">Pause</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to Play:</h3>
+            <ul>
+                <li>Use left/right arrow keys to move the paddle</li>
+                <li>Bounce the ball to break all the bricks</li>
+                <li>Don't let the ball fall below the paddle</li>
+                <li>Press Spacebar to pause/resume the game</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Game constants and variables
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game state
+        let score = 0;
+        let lives = 3;
+        let level = 1;
+        let gameOver = false;
+        let gameWin = false;
+        let gameStarted = false;
+        let gamePaused = false;
+        let animationFrameId;
+        
+        // Ball properties
+        const ballRadius = 10;
+        let ballX;
+        let ballY;
+        let ballSpeedX;
+        let ballSpeedY;
+        
+        // Paddle properties
+        const paddleHeight = 15;
+        const paddleWidth = 100;
+        let paddleX;
+        
+        // Brick properties
+        const brickRowCount = 5;
+        const brickColumnCount = 9;
+        const brickWidth = 75;
+        const brickHeight = 20;
+        const brickPadding = 10;
+        const brickOffsetTop = 60;
+        const brickOffsetLeft = 35;
+        let bricks = [];
+        
+        // DOM Elements
+        const scoreElement = document.getElementById('score');
+        const livesElement = document.getElementById('lives');
+        const levelElement = document.getElementById('level');
+        const finalScoreElement = document.getElementById('final-score');
+        const winScoreElement = document.getElementById('win-score');
+        const gameOverElement = document.getElementById('game-over');
+        const gameWinElement = document.getElementById('game-win');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        
+        // Initialize the game
+        function initGame() {
+            // Set initial ball position and speed
+            ballX = canvas.width / 2;
+            ballY = canvas.height - 30;
+            ballSpeedX = 5;
+            ballSpeedY = -5;
+            
+            // Set initial paddle position
+            paddleX = (canvas.width - paddleWidth) / 2;
+            
+            // Initialize bricks
+            initBricks();
+            
+            // Add event listeners
+            document.addEventListener('keydown', handleKeyPress);
+            document.addEventListener('mousemove', handleMouseMove);
+            startBtn.addEventListener('click', toggleGame);
+            pauseBtn.addEventListener('click', togglePause);
+            restartBtn.addEventListener('click', resetGame);
+            playAgainBtn.addEventListener('click', resetGame);
+            
+            // Adjust canvas size for mobile
+            if (window.innerWidth <= 768) {
+                canvas.width = Math.min(700, window.innerWidth - 40);
+                canvas.height = 400;
+            }
+            
+            // Draw initial state
+            draw();
+        }
+        
+        // Initialize bricks
+        function initBricks() {
+            bricks = [];
+            const colors = ['#e74c3c', '#f39c12', '#f1c40f', '#2ecc71', '#3498db'];
+            
+            for (let c = 0; c < brickColumnCount; c++) {
+                bricks[c] = [];
+                for (let r = 0; r < brickRowCount; r++) {
+                    const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+                    const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+                    const color = colors[r];
+                    
+                    bricks[c][r] = { x: brickX, y: brickY, status: 1, color: color };
+                }
+            }
+        }
+        
+        // Main game loop
+        function runGame() {
+            if (gamePaused || !gameStarted || gameOver || gameWin) return;
+            
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw game elements
+            drawBricks();
+            drawBall();
+            drawPaddle();
+            drawScore();
+            drawLives();
+            
+            // Check for collisions
+            checkCollision();
+            
+            // Move the ball
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+            
+            // Wall collision (right/left)
+            if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
+                ballSpeedX = -ballSpeedX;
+            }
+            
+            // Wall collision (top)
+            if (ballY - ballRadius < 0) {
+                ballSpeedY = -ballSpeedY;
+            }
+            
+            // Paddle collision
+            if (
+                ballY + ballRadius > canvas.height - paddleHeight &&
+                ballX > paddleX &&
+                ballX < paddleX + paddleWidth
+            ) {
+                // Adjust ball angle based on where it hits the paddle
+                const hitPoint = (ballX - (paddleX + paddleWidth / 2)) / (paddleWidth / 2);
+                ballSpeedY = -Math.abs(ballSpeedY); // Always bounce up
+                ballSpeedX = hitPoint * 7; // Adjust horizontal speed based on hit position
+            }
+            
+            // Bottom collision - lose a life
+            else if (ballY + ballRadius > canvas.height) {
+                lives--;
+                livesElement.textContent = lives;
+                
+                if (lives === 0) {
+                    gameOver = true;
+                    gameOverElement.style.display = 'flex';
+                    finalScoreElement.textContent = score;
+                    return;
+                } else {
+                    // Reset ball and paddle
+                    ballX = canvas.width / 2;
+                    ballY = canvas.height - 30;
+                    ballSpeedX = 5;
+                    ballSpeedY = -5;
+                    paddleX = (canvas.width - paddleWidth) / 2;
+                }
+            }
+            
+            // Check for win
+            if (checkWin()) {
+                gameWin = true;
+                gameWinElement.style.display = 'flex';
+                winScoreElement.textContent = score;
+                return;
+            }
+            
+            // Continue animation
+            animationFrameId = requestAnimationFrame(runGame);
+        }
+        
+        // Draw the ball
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.closePath();
+            
+            // Add shine effect
+            ctx.beginPath();
+            ctx.arc(ballX - ballRadius/3, ballY - ballRadius/3, ballRadius/4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fill();
+            ctx.closePath();
+        }
+        
+        // Draw the paddle
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.roundRect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight, 10);
+            ctx.fillStyle = '#3498db';
+            ctx.fill();
+            ctx.closePath();
+            
+            // Add shine effect
+            ctx.beginPath();
+            ctx.roundRect(paddleX + 10, canvas.height - paddleHeight + 5, paddleWidth - 20, 5, 5);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.fill();
+            ctx.closePath();
+        }
+        
+        // Draw the bricks
+        function drawBricks() {
+            for (let c = 0; c < brickColumnCount; c++) {
+                for (let r = 0; r < brickRowCount; r++) {
+                    if (bricks[c][r].status === 1) {
+                        ctx.beginPath();
+                        ctx.roundRect(bricks[c][r].x, bricks[c][r].y, brickWidth, brickHeight, 5);
+                        ctx.fillStyle = bricks[c][r].color;
+                        ctx.fill();
+                        ctx.closePath();
+                        
+                        // Add brick detail
+                        ctx.beginPath();
+                        ctx.roundRect(bricks[c][r].x + 5, bricks[c][r].y + 5, brickWidth - 10, brickHeight - 10, 3);
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                }
+            }
+        }
+        
+        // Draw the score
+        function drawScore() {
+            ctx.font = '20px Arial';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(`Score: ${score}`, 20, 25);
+        }
+        
+        // Draw lives
+        function drawLives() {
+            ctx.font = '20px Arial';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(`Lives: ${lives}`, canvas.width - 100, 25);
+        }
+        
+        // Draw everything
+        function draw() {
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw game elements
+            drawBricks();
+            drawBall();
+            drawPaddle();
+            drawScore();
+            drawLives();
+        }
+        
+        // Check for collisions with bricks
+        function checkCollision() {
+            for (let c = 0; c < brickColumnCount; c++) {
+                for (let r = 0; r < brickRowCount; r++) {
+                    const brick = bricks[c][r];
+                    
+                    if (brick.status === 1) {
+                        if (
+                            ballX + ballRadius > brick.x &&
+                            ballX - ballRadius < brick.x + brickWidth &&
+                            ballY + ballRadius > brick.y &&
+                            ballY - ballRadius < brick.y + brickHeight
+                        ) {
+                            ballSpeedY = -ballSpeedY;
+                            brick.status = 0;
+                            score += 10;
+                            scoreElement.textContent = score;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Check if all bricks are destroyed
+        function checkWin() {
+            for (let c = 0; c < brickColumnCount; c++) {
+                for (let r = 0; r < brickRowCount; r++) {
+                    if (bricks[c][r].status === 1) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        
+        // Handle keyboard input
+        function handleKeyPress(e) {
+            // Pause game on spacebar
+            if (e.keyCode === 32 && gameStarted) {
+                togglePause();
+                return;
+            }
+            
+            // Start game on any key if not started
+            if (!gameStarted && e.keyCode !== 32) {
+                toggleGame();
+            }
+            
+            // Paddle controls
+            if (gameStarted && !gamePaused) {
+                if (e.keyCode === 37) { // Left arrow
+                    paddleX = Math.max(0, paddleX - 15);
+                } else if (e.keyCode === 39) { // Right arrow
+                    paddleX = Math.min(canvas.width - paddleWidth, paddleX + 15);
+                }
+            }
+        }
+        
+        // Handle mouse movement for paddle control
+        function handleMouseMove(e) {
+            if (gameStarted && !gamePaused) {
+                const relativeX = e.clientX - canvas.getBoundingClientRect().left;
+                if (relativeX > 0 && relativeX < canvas.width) {
+                    paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, relativeX - paddleWidth / 2));
+                }
+            }
+        }
+        
+        // Toggle game state
+        function toggleGame() {
+            if (!gameStarted) {
+                gameStarted = true;
+                startBtn.textContent = "Restart Game";
+                runGame();
+            } else {
+                resetGame();
+            }
+        }
+        
+        // Toggle pause state
+        function togglePause() {
+            gamePaused = !gamePaused;
+            pauseBtn.textContent = gamePaused ? "Resume" : "Pause";
+            
+            if (!gamePaused && gameStarted) {
+                runGame();
+            }
+        }
+        
+        // Reset the game
+        function resetGame() {
+            // Cancel any ongoing animation
+            cancelAnimationFrame(animationFrameId);
+            
+            // Reset game state
+            score = 0;
+            lives = 3;
+            level = 1;
+            gameOver = false;
+            gameWin = false;
+            gameStarted = false;
+            gamePaused = false;
+            
+            // Update UI
+            scoreElement.textContent = score;
+            livesElement.textContent = lives;
+            levelElement.textContent = level;
+            gameOverElement.style.display = 'none';
+            gameWinElement.style.display = 'none';
+            startBtn.textContent = "Start Game";
+            pauseBtn.textContent = "Pause";
+            
+            // Reinitialize the game
+            initGame();
+        }
+        
+        // Initialize the game when the page loads
+        window.addEventListener('load', initGame);
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 768) {
+                canvas.width = Math.min(700, window.innerWidth - 40);
+                canvas.height = 400;
+            } else {
+                canvas.width = 800;
+                canvas.height = 500;
+            }
+            
+            if (gameStarted && !gameOver && !gameWin) {
+                draw();
+            }
+        });
+        
+        // Add roundRect method to CanvasRenderingContext2D if not available
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                if (width < 2 * radius) radius = width / 2;
+                if (height < 2 * radius) radius = height / 2;
+                
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.arcTo(x + width, y, x + width, y + height, radius);
+                this.arcTo(x + width, y + height, x, y + height, radius);
+                this.arcTo(x, y + height, x, y, radius);
+                this.arcTo(x, y, x + width, y, radius);
+                this.closePath();
+                return this;
+            };
+        }
+    </script>
+</body>
+</html>

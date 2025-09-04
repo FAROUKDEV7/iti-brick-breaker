@@ -46,9 +46,3 @@ Losing the ball costs one life
 
 Game ends when all lives are lost or all bricks are broken
 
-
-📸 Screenshots
-https://via.placeholder.com/400x250/2c3e50/ffffff?text=Game+In+Progress
-Colorful bricks and smooth gameplay
-
-
